@@ -46,3 +46,33 @@ def login(request):
         except Exception:
             raise ValueError
 
+def user_model_register(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        name = data.get('name')
+        username = data.get('username')
+        password = data.get('password')
+        user = User.objects.create_user(name, username, password)
+        user.save()
+        form_dict = { "data" : {
+            "name" : name,
+            "username" : username,
+            "password" : password},
+            "message" : "User registered"
+        }
+    return JsonResponse(form_dict)
+
+def user_model_login(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(username=username, password=password)
+        try:
+            if user is not None:
+                auth_login(request, user)
+                return HttpResponse("Login successful")
+            else:
+                return HttpResponse("Wrong credentials")
+        except Exception:
+            raise ValueError
